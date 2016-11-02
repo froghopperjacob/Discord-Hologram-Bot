@@ -1,2 +1,2 @@
-# Discord-Hologram-Bot
-Discord Bot
+# Discord Hologram Bot
+To finish
