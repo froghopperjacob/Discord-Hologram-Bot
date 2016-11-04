@@ -28,7 +28,7 @@ addCommand("Commands","Replys with all the commands",["cmds"],function(message,s
 });
 
 addCommand("Update","Updates the bot to the newest version",["update"],function(message,splitstring) {
-	Git.Clone("https://github.com/froghopperjacob/Discord-Hologram-Bot", "./gitRun").then(function(repository) {
+	nodegit.Clone("https://github.com/froghopperjacob/Discord-Hologram-Bot", "./gitRun").then(function(repository) {
 	  // Work with the repository object here.
 	});
 })
