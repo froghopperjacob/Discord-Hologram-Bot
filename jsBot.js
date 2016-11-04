@@ -32,9 +32,10 @@ addCommand("Update","Updates the bot to the newest version",["update"],function(
 	message.channel.sendMessage('Downloading latest push/version').then(m => {
 		nodegit.Clone("https://github.com/froghopperjacob/Discord-Hologram-Bot", "./download").then(function(repository) {
 		  var took = m.createdTimestamp - message.createdTimestamp
-		  m.edit('Downloaded commit '+repository.getCommit()+'``'+took+'``')
+		  m.edit('Downloaded commit '+repository.getCommit()+'``'+took+'ms``')
 		  message.channel.sendMessage('Shutting down and updating')
 		  childprocess.exec('C:/Users/frogh/Discord-Hologram-Bot/update.bat')
+		  process.exit()
 		});
 	})
 })
