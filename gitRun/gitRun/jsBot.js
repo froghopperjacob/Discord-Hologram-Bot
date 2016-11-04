@@ -2,7 +2,6 @@ var Discord = require("discord.js");
 var fs = require("fs")
 var nodegit = require('nodegit')
 var ytdl = require("ytdl-core");
-var childprocess = require('child_preocess')
 var bot = new Discord.Client();
 var guild = null
 var voiceChannelid = "242327411247677442"
@@ -29,13 +28,7 @@ addCommand("Commands","Replys with all the commands",["cmds"],function(message,s
 });
 
 addCommand("Update","Updates the bot to the newest version",["update"],function(message,splitstring) {
-	message.channel.sendMessage('Downloading latest push/version').then(m => {
-		nodegit.Clone("https://github.com/froghopperjacob/Discord-Hologram-Bot", "./gitRun").then(function(repository) {
-		  m.edit('Downloaded commit '+repository.getCommit())
-		  message.channel.sendMessage('Shutting down and updating')
-		  childprocess.exec('C:/Users/frogh/Discord-Hologram-Bot/update.bat')
-		});
-	})
+
 })
 
 addCommand("play","Plays a song or queues a song",["play"],function(message,splitstring) {
