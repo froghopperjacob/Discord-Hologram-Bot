@@ -5,7 +5,7 @@ var ytdl = require("ytdl-core");
 var childprocess = require('child_process')
 var bot = new Discord.Client();
 var guild = null
-var voiceChannelid = "242327411247677442"
+var voiceChannelid = "117018278278332416"
 var voiceChannel = bot.channels.find('id',voiceChannelid)
 var textChannel = null
 var messageBool = false
@@ -21,22 +21,32 @@ addCommand("Ping","Replies with Pong",["ping"],function(message,splitString) {
 		msg.edit("Pong! ``"+took+"ms``")
 	})
 });
-addCommand("Commands","Replys with all the commands",["cmds"],function(message,splitstring) {
+addCommand("Commands","Replys with all the commands",["cmds",'commands'],function(message,splitstring) {
 	for(var i in commands) {
 		message.channel.sendMessage("``Command:"+commands[i].Name+" Description:"+commands[i].Desc+" Calls:"+commands[i].Calls+"``");
 	}
 	message.channel.sendMessage('Do ``@Hologram help <cmd>`` to get a better desc from a command')
 });
 
-addCommand("Update","Updates the bot to the newest version",["update"],function(message,splitstring) {
+addCommand("Updategit","Updates the bot to the newest version of the repository",["updategit"],function(message,splitstring) {
 	message.channel.sendMessage('Downloading latest push/version').then(m => {
 		nodegit.Clone("https://github.com/froghopperjacob/Discord-Hologram-Bot", "./download").then(function(repository) {
 		  var took = m.createdTimestamp - message.createdTimestamp
 		  m.edit('Downloaded commit '+repository.getCommit()+'``'+took+'ms``')
 		  message.channel.sendMessage('Shutting down and updating')
 		  childprocess.exec('C:/Users/frogh/Discord-Hologram-Bot/update.bat')
-		  process.exit()
 		});
+	})
+})
+
+addCommand('Update','Updates the bot from the local machine',['update'],function(message,splitstring) {
+	message.channel.sendMessage('Updating and shutting down..').then(m => {
+		childprocess.exec('cmd /c start "" cmd /c run.bat', function(){
+		   // …you callback code may run here…
+		});
+		setTimeout(function(){
+			process.exit()
+		},2000)
 	})
 })
 
@@ -133,12 +143,23 @@ addCommand('setTxtChannel',"set's the bots normal text channel",['setTxtChannel'
 	textChannel = find
 	message.channel.sendMessage('Set main text channel to '+find.name)
 })
+addCommand('Kick','Kicks a play from a server',['kick'],function(message,splitstring) {
+	var object = bot.users.find('username',splitstring)
+	message.guild.member(object).kick()
+	message.channel.sendMessage('Kicked player '+splitstring)
+})
+addCommand('Ban','Bans a play from a server',['ban'],function(message,splitstring) {
+	var object = bot.users.find('username',splitstring)
+	message.guild.member(object).ban()
+	message.channel.sendMessage('Kicked player '+splitstring)
+})
 bot.on("message", message => {
+	if(message.author.bot) return;
 	guild = message.guild
 	if(messageBool == true) {
 		textChannel = guild.defaultChannel
-		message.guild.defaultChannel.sendMessage("Hologram bot Online");
-		message.guild.defaultChannel.sendMessage('type in ``@Hologram cmds`` for cmds and help')
+		//message.guild.defaultChannel.sendMessage("Hologram bot Online");
+		//message.guild.defaultChannel.sendMessage('type in ``@Hologram cmds`` for cmds and help')
 		messageBool = false
 	}
 	if (message.isMentioned(bot.user)) {
