@@ -5,8 +5,7 @@ var ytdl = require("ytdl-core");
 var childprocess = require('child_process')
 var bot = new Discord.Client();
 var guild = null
-var voiceChannelid = "117018278278332416"
-var voiceChannel = bot.channels.find('id',voiceChannelid)
+var voiceChannelid = "242368987021836289"
 var textChannel = null
 var messageBool = false
 var commands = [];
@@ -51,10 +50,11 @@ addCommand('Update','Updates the bot from the local machine',['update'],function
 })
 
 addCommand("play","Plays a song or queues a song",["play"],function(message,splitstring) {
+	var voiceChannel = bot.channels.find('id',voiceChannelid)
 	if (bot.voiceConnections.size == 0) {
 		voiceChannel.join().then(connection => {
 			let dispatcher;
-			play=function(song) {
+			play=function(song) {+
 				ytdl.getInfo(song,function(err,info) {
 					console.log(song)
    					console.log(queues.size)
@@ -131,10 +131,11 @@ addCommand("play","Plays a song or queues a song",["play"],function(message,spli
 })
 addCommand("setVoice","sets the voiceChannel in which the bot will join",["setVoice"],function(message,splitstring) {
 	var find = bot.channels.find('id',splitstring)
-	voiceChannel = find
+	voiceChannelid = find.id
 	message.channel.sendMessage('Set main voice channel to '+find.name)
 })
 addCommand("forceLeave","force leaves the bot",["forceleave"],function(message,splitstring) {
+	var voiceChannel = bot.channels.find('id',voiceChannelid)
 	voiceChannel.leave()
 	message.channel.sendMessage('Left voice channel:'+voiceChannel.name)
 })
@@ -153,6 +154,16 @@ addCommand('Ban','Bans a play from a server',['ban'],function(message,splitstrin
 	message.guild.member(object).ban()
 	message.channel.sendMessage('Kicked player '+splitstring)
 })
+addCommand('Eval','Runs a piece of code',['eval'],function(message,splitstring) {
+	message.channel.sendMessage('Running..').then(m => {
+		try {
+			m.edit("```js\n"+eval(splitstring.trim())+"\n```")
+		} catch (err) {
+			m.edit('Error!\n```js\n'+err.message+"\n```")
+			console.log(err.stack)
+		}
+	})
+})
 bot.on("message", message => {
 	if(message.author.bot) return;
 	guild = message.guild
@@ -163,18 +174,17 @@ bot.on("message", message => {
 		messageBool = false
 	}
 	if (message.isMentioned(bot.user)) {
+		var check = false
+		var checkString = message.content.split(" ")[1];
+		var length = checkString.length;
 		for (var i in commands) {
 			for (var a in commands[i].Calls) {
-				var checkString = message.content.split(" ")[1];
-				var length = checkString.length;
 				if (commands[i].Calls[a] == checkString) {
+					check = true
 					try {
-						var splitString = message.content.split(" ")[2]
-						if (splitString == undefined) {
-							commands[i].Function(message,null);
-						} else {
-							commands[i].Function(message,splitString);
-						}
+						var splitString = message.content.slice(length+23);
+						commands[i].Function(message,splitString);
+						console.log(splitString)
 					} catch(e) {
 						console.log("[ERROR] : " + e);
 						message.reply("There is a error with the "+commands[i].Name+" command please tell froghopperjacob/Jacob this error:"+e);
@@ -182,11 +192,14 @@ bot.on("message", message => {
 				}
 			}
 		}
+		if (check == false) {
+			//message.channel.sendMessage('Unknown command "'+checkString+'" type ``@Hologram commands`` for commands')
+		}
 	}
 });
 bot.on("ready", () => {
   console.log("Bot Ready!");
   messageBool = true
-  bot.user.setGame("with Music")
+  bot.user.setGame("@Hologram commands")
 });
 bot.login("MjQyMzQ0MDAyNDU4ODc3OTUy.CvfGew.BC1NlQDxMarglXiUhPbtbbovJ0E");
