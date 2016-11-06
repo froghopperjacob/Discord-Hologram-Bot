@@ -27,7 +27,9 @@ addCommand("Commands","Replys with all the commands",["cmds",'commands'],functio
 	}
 	message.channel.sendMessage('Do ``@Hologram help <cmd>`` to get a better desc from a command')
 });
+addCommand('Help','Gives the full description of a command',['help'],function(message,splitstring) {
 
+})
 addCommand("Updategit","Updates the bot to the newest version of the repository",["updategit"],function(message,splitstring) {
 	message.channel.sendMessage('Downloading latest push/version').then(m => {
 		nodegit.Clone("https://github.com/froghopperjacob/Discord-Hologram-Bot", "./download").then(function(repository) {
@@ -240,7 +242,6 @@ bot.on("message", message => {
 					try {
 						let splitString = message.content.slice(length+23);
 						commands[i].Function(message,splitString);
-						console.log(splitString)
 					} catch(e) {
 						console.log("[ERROR] : " + e);
 						message.reply("There is a error with the "+commands[i].Name+" command please tell froghopperjacob/Jacob this error:"+e);
