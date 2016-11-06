@@ -1,16 +1,17 @@
-var Discord = require("discord.js");
-var fs = require("fs")
-var nodegit = require('nodegit')
-var ytdl = require("ytdl-core");
-var childprocess = require('child_process')
-var bot = new Discord.Client();
-var guild = null
-var voiceChannelid = "242368987021836289"
-var textChannel = null
-var messageBool = false
-var commands = [];
-var queues = [];
-var currentVolume = 0.12000000000000006
+const Discord = require("discord.js");
+const google = require('googleapis')
+const fs = require("fs")
+const nodegit = require('nodegit')
+const ytdl = require("ytdl-core");
+const childprocess = require('child_process')
+const bot = new Discord.Client();
+let guild = null
+let voiceChannelid = "242368987021836289"
+let textChannel = null
+let messageBool = false
+let commands = [];
+let queues = [];
+let currentVolume = 0.12000000000000006
 function addCommand(name,description,command,func) {
 	commands.push({Name:name,Desc:description,Calls:command,Function:func});
 }
@@ -37,7 +38,55 @@ addCommand("Updategit","Updates the bot to the newest version of the repository"
 		});
 	})
 })
+addCommand('Search images','Searches google for images',['image'],function(message,splitstring) {
+	customsearch = google.customsearch('v1')
+	customsearch.cse.list({cx:'010090593600436946172:tki7yhxfw7u',q:splitstring,auth:'AIzaSyDBaQK3vYdBdVWIZyc_td498I5zoGfEp9E',searchType:'image'},function(err,resp) {
+		if (err) {
+			message.channel.sendMessage('Error!\n```'+err+'\n```')
+		}
 
+		if (resp.items && resp.items.length > 0) {
+			randomR = resp.items[Math.floor((Math.random() * resp.items.length) + 1)]
+			message.channel.sendMessage('Results:'+resp.searchInformation.formattedTotalResults)
+			message.channel.sendMessage('Image:``'+randomR.title+'``\n'+randomR.link)
+		} else {
+			message.channel.sendMessage('No results :(')
+		}
+	})
+})
+addCommand('Search giphy','Searches giphy for images',['gif'],function(message,splitstring) {
+	customsearch = google.customsearch('v1')
+	customsearch.cse.list({cx:'010090593600436946172:tki7yhxfw7u',q:splitstring,auth:'AIzaSyDBaQK3vYdBdVWIZyc_td498I5zoGfEp9E',searchType:'image',linkSite:'www.giphy.com'},function(err,resp) {
+		if (err) {
+			message.channel.sendMessage('Error!\n```'+err+'\n```')
+		}
+
+		if (resp.items && resp.items.length > 0) {
+			randomR = resp.items[Math.floor((Math.random() * resp.items.length) + 1)]
+			message.channel.sendMessage('Results:'+resp.searchInformation.formattedTotalResults)
+			message.channel.sendMessage('Image:``'+randomR.title+'``\n'+randomR.link)
+		} else {
+			message.channel.sendMessage('No results :(')
+		}
+	})
+})
+addCommand('Search','Searches google',['search'],function(message,splitstring) {
+	customsearch = google.customsearch('v1')
+	customsearch.cse.list({cx:'010090593600436946172:tki7yhxfw7u',q:splitstring,auth:'AIzaSyDBaQK3vYdBdVWIZyc_td498I5zoGfEp9E'},function(err,resp) {
+		if (err) {
+			message.channel.sendMessage('Error:\n```'+err+'\n```')
+		}
+
+		if (resp.items && resp.items.length > 0) {
+			firstR = resp.items[0]
+			message.channel.sendMessage('Results:'+resp.searchInformation.formattedTotalResults)
+			message.channel.sendMessage('The first result is \n```Title:'+firstR.title+'\n\nLink : '+firstR.link+'\nDescription : '+firstR.snippet+"\n```")
+		} else {
+			message.channel.sendMessage('No results :(')
+		}
+	})
+
+})
 addCommand('Update','Updates the bot from the local machine',['update'],function(message,splitstring) {
 	message.channel.sendMessage('Updating and shutting down..').then(m => {
 		childprocess.exec('cmd /c start "" cmd /c run.bat', function(){
@@ -73,7 +122,8 @@ addCommand("play","Plays a song or queues a song",["play"],function(message,spli
 	   				let collector = message.channel.createCollector(m => m)
 	   				collector.on("message", m => {
 	   					if (m.isMentioned(bot.user)) {
-	   						var checkString = m.content.split(" ")[1];
+	   						let checkString = m.content.split(" ")[1];
+	   						let args = m.content.split(' ')[2]
 	   						if(checkString == 'pause') {
 	   							message.channel.sendMessage("The song,"+info.title+", is now paused").then(() => {dispatcher.pause();});
 	   						} else if(checkString == 'resume') {
@@ -82,13 +132,14 @@ addCommand("play","Plays a song or queues a song",["play"],function(message,spli
 								message.channel.sendMessage("Skipped the song,"+info.title).then(() => {dispatcher.end();});
 	   						} else if(checkString == 'volume+') {
 	   							if (Math.round(dispatcher.volume*50) >= 100) return message.channel.sendMessage(`Volume: ${Math.round(dispatcher.volume*50)}%`);
-								dispatcher.setVolume(Math.min((dispatcher.volume*50 + (2*(m.content.split("+").length-1)))/50,2));
-								currentVolume = Math.min((dispatcher.volume*50 + (2*(m.content.split("+").length-1)))/50,2)
+								dispatcher.setVolume(Math.min((dispatcher.volume*50 + (2*(args.split("+").length-1)))/50,2));
+								currentVolume = Math.min((dispatcher.volume*50 + (2*(args.split("+").length-1)))/50,2)
 								message.channel.sendMessage(`Volume: ${Math.round(dispatcher.volume*50)}%`);
 	   						} else if(checkString == 'volume-') {
 								if (Math.round(dispatcher.volume*50) <= 0) return message.channel.sendMessage(`Volume: ${Math.round(dispatcher.volume*50)}%`);
-								dispatcher.setVolume(Math.max((dispatcher.volume*50 - (2*(m.content.split("-").length-1)))/50,0));
-								currentVolume = Math.max((dispatcher.volume*50 - (2*(m.content.split("-").length-1)))/50,0)
+								dispatcher.setVolume(Math.max((dispatcher.volume*50 - (2*(args.split("-").length-1)))/50,0));
+								currentVolume = Math.max((dispatcher.volume*50 - (2*(args.split("-").length-1)))/50,0)
+								message.channel.sendMessage(`Volume: ${Math.round(dispatcher.volume*50)}%`);
 	   						} else if(checkString == 'time') {
 								message.channel.sendMessage(`Current video time: ${Math.floor(dispatcher.time / 60000)}:${Math.floor((dispatcher.time % 60000)/1000) <10 ? "0"+Math.floor((dispatcher.time % 60000)/1000) : Math.floor((dispatcher.time % 60000)/1000)}`);
 	   						} else if(checkString == 'clear') {
@@ -130,27 +181,27 @@ addCommand("play","Plays a song or queues a song",["play"],function(message,spli
 	}
 })
 addCommand("setVoice","sets the voiceChannel in which the bot will join",["setVoice"],function(message,splitstring) {
-	var find = bot.channels.find('id',splitstring)
+	let find = message.guild.channels.find('name',splitstring)
 	voiceChannelid = find.id
 	message.channel.sendMessage('Set main voice channel to '+find.name)
 })
 addCommand("forceLeave","force leaves the bot",["forceleave"],function(message,splitstring) {
-	var voiceChannel = bot.channels.find('id',voiceChannelid)
+	let voiceChannel = message.guild.channels.find('id',voiceChannelid)
 	voiceChannel.leave()
 	message.channel.sendMessage('Left voice channel:'+voiceChannel.name)
 })
 addCommand('setTxtChannel',"set's the bots normal text channel",['setTxtChannel'],function(message,splitstring) {
-	var find = bot.channels.find('id',splitstring)
+	let find = message.guild.channels.find('name',splitstring)
 	textChannel = find
 	message.channel.sendMessage('Set main text channel to '+find.name)
 })
 addCommand('Kick','Kicks a play from a server',['kick'],function(message,splitstring) {
-	var object = bot.users.find('username',splitstring)
+	let object = bot.users.find('username',splitstring)
 	message.guild.member(object).kick()
 	message.channel.sendMessage('Kicked player '+splitstring)
 })
 addCommand('Ban','Bans a play from a server',['ban'],function(message,splitstring) {
-	var object = bot.users.find('username',splitstring)
+	let object = bot.users.find('username',splitstring)
 	message.guild.member(object).ban()
 	message.channel.sendMessage('Kicked player '+splitstring)
 })
@@ -164,25 +215,30 @@ addCommand('Eval','Runs a piece of code',['eval'],function(message,splitstring) 
 		}
 	})
 })
+addCommand('leave','Leaves a server',['leaveServer'],function(message,splitstring) {
+	message.guild
+})
 bot.on("message", message => {
 	if(message.author.bot) return;
 	guild = message.guild
 	if(messageBool == true) {
 		textChannel = guild.defaultChannel
+		var find = message.guild.channels.find('name','General')
+		voiceChannelid = find.id
 		//message.guild.defaultChannel.sendMessage("Hologram bot Online");
 		//message.guild.defaultChannel.sendMessage('type in ``@Hologram cmds`` for cmds and help')
 		messageBool = false
 	}
 	if (message.isMentioned(bot.user)) {
-		var check = false
-		var checkString = message.content.split(" ")[1];
-		var length = checkString.length;
+		let check = false
+		let checkString = message.content.split(" ")[1];
+		let length = checkString.length;
 		for (var i in commands) {
 			for (var a in commands[i].Calls) {
 				if (commands[i].Calls[a] == checkString) {
 					check = true
 					try {
-						var splitString = message.content.slice(length+23);
+						let splitString = message.content.slice(length+23);
 						commands[i].Function(message,splitString);
 						console.log(splitString)
 					} catch(e) {
@@ -200,6 +256,6 @@ bot.on("message", message => {
 bot.on("ready", () => {
   console.log("Bot Ready!");
   messageBool = true
-  bot.user.setGame("@Hologram commands")
+  bot.user.setGame("@Hologram cmds")
 });
 bot.login("MjQyMzQ0MDAyNDU4ODc3OTUy.CvfGew.BC1NlQDxMarglXiUhPbtbbovJ0E");
