@@ -217,9 +217,6 @@ addCommand('Eval','Runs a piece of code',['eval'],function(message,splitstring) 
 		}
 	})
 })
-addCommand('leave','Leaves a server',['leaveServer'],function(message,splitstring) {
-	message.guild
-})
 bot.on("message", message => {
 	if(message.author.bot) return;
 	guild = message.guild
