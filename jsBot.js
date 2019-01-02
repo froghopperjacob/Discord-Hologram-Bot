@@ -256,4 +256,4 @@ bot.on("ready", () => {
   messageBool = true
   bot.user.setGame("@Hologram cmds")
 });
-bot.login("MjQyMzQ0MDAyNDU4ODc3OTUy.CvfGew.BC1NlQDxMarglXiUhPbtbbovJ0E");
+bot.login("nou");
